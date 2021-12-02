@@ -1,0 +1,31 @@
+┌──(kali㉿kali)-[~]
+└─$ msfvenom -f raw -p windows/exec cmd=calc exitfunc=seh --bad-chars '\x00' --smallest -o payload.bin
+[-] No platform was selected, choosing Msf::Module::Platform::Windows from the payload
+[-] No arch selected, selecting arch: x86 from the payload
+Found 11 compatible encoders
+Attempting to encode payload with 1 iterations of x86/shikata_ga_nai
+x86/shikata_ga_nai succeeded with size 216 (iteration=0)
+Attempting to encode payload with 1 iterations of generic/none
+generic/none failed with Encoding failed due to a bad character (index=3, char=0x00)
+Attempting to encode payload with 1 iterations of x86/call4_dword_xor
+x86/call4_dword_xor succeeded with size 216 (iteration=0)
+Attempting to encode payload with 1 iterations of x86/countdown
+x86/countdown succeeded with size 206 (iteration=0)
+Attempting to encode payload with 1 iterations of x86/fnstenv_mov
+x86/fnstenv_mov succeeded with size 214 (iteration=0)
+Attempting to encode payload with 1 iterations of x86/jmp_call_additive
+x86/jmp_call_additive succeeded with size 221 (iteration=0)
+Attempting to encode payload with 1 iterations of x86/xor_dynamic
+x86/xor_dynamic succeeded with size 235 (iteration=0)
+Attempting to encode payload with 1 iterations of x86/alpha_mixed
+x86/alpha_mixed succeeded with size 438 (iteration=0)
+Attempting to encode payload with 1 iterations of x86/alpha_upper
+x86/alpha_upper succeeded with size 447 (iteration=0)
+Attempting to encode payload with 1 iterations of x86/nonalpha
+x86/nonalpha failed with Encoding failed due to a bad character (index=39, char=0x00)
+Attempting to encode payload with 1 iterations of x86/nonupper
+x86/nonupper failed with Encoding failed due to a bad character (index=39, char=0x00)
+x86/countdown chosen with final size 206
+Payload size: 206 bytes
+Saved as: payload.bin
+
