@@ -18,30 +18,26 @@ HANDLE OpenPayload(char *path){
     );
 }
 
-char *ReadPayload(HANDLE payload_handle){
+int ReadPayload(HANDLE payload_handle, char* &payload_buffer){
     /* Returns a pointer to the byte array containing the payload. */
-    DWORD payload_size = GetFileSize(payload_handle, NULL);
+    int payload_size = GetFileSize(payload_handle, NULL);
     DWORD bytes_read = 0;
-    char *payload_buffer = new char[payload_size + 1];
+    char *buffer = new char[payload_size + 1];
     if(
         ReadFile(
-            payload_handle, payload_buffer, payload_size, &bytes_read, NULL
+            payload_handle, buffer, payload_size, &bytes_read, NULL
         )
     ){
-        // Successfully read payload bytes.
-        payload_buffer[bytes_read] = '\0';
-        if(bytes_read > 0){
-            // Payload contains data.
-            return payload_buffer;
-        }
-        return "EMPTY";
+        // Ensure null termination.
+        buffer[bytes_read] = '\0';
+        payload_buffer = buffer;
+        return bytes_read;
     }
-    return "ERR";
+    return -1;
 }
 
-void *CopyToMemory(char *payload_buffer){
-    /* Take the payload, copy it into memory. */
-    DWORD buffer_size = strlen(payload_buffer) + 1;
+void *CopyToMemory(char *payload_buffer, int buffer_size){
+    /* Copy the payload into executable memory. */
     void *function_pointer = VirtualAlloc(
         0,
         buffer_size,
@@ -56,34 +52,45 @@ void RunPayload(void *function_pointer){
     /* Execute the binary payload from memory. */
     printf("Executing payload!");
     ((void(*)())function_pointer)();
-}
+}    
 
-int main(int argc, char **argv){
+int main(int argc, char *argv[]){
+    /* Execute a user-provided payload. */
+
+    // Check for correct number of arguments.
     if(argc < 2){
-        printf(
-            "Usage: %s [path to payload]\nExecutes the specified binary payload.\n",
-            argv[0]
-        );
-        return 0;
+        printf("Usage: %s <payload_path>", argv[0]);
+        return 1;
     }
 
-    // Get a file handle on the payload.
+    // Open the payload file.
     HANDLE payload_handle = OpenPayload(argv[1]);
-    if(payload_handle != INVALID_HANDLE_VALUE){
-        // Load the contents.
-        char *payload_buffer = ReadPayload(payload_handle);
-        if(strcmp(payload_buffer, "ERR") == 0){
-            printf("Error: Could not read payload contents.");
-        }else if(strcmp(payload_buffer, "EMPTY") == 0){
-            printf("Error: Payload is empty.");
-        }else{
-            void *function_pointer = CopyToMemory(payload_buffer);
-            RunPayload(function_pointer);
-        }
-    }else{
-        // Payload failed to load.
-        printf("Error: Could not open payload at path %s", argv[1]);
+    if(payload_handle == INVALID_HANDLE_VALUE){
+        printf("Unable to open payload. Please check the path.");
+        return 1;
     }
+
+    // Read payload into memory.
+    char *payload_buffer;
+    int payload_size = ReadPayload(payload_handle, payload_buffer);
     CloseHandle(payload_handle);
+
+    // Ensure payload is valid.
+    switch (payload_size)
+    {
+    case 0: // Payload is empty.
+        printf("Payload is empty.");
+        return 1;
+    case -1: // ReadFile failed.
+        printf("Unable to read payload. Please check file permissions.");
+        return 1;
+    default: // Payload is valid.
+        break;
+    }
+
+    void *function_pointer = CopyToMemory(payload_buffer, payload_size);
+
+    // Run the payload.
+    RunPayload(function_pointer);
     return 0;
 }
