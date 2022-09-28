@@ -1,5 +1,5 @@
 // runp.cpp : Run a binary payload in a wrapper, for easier analysis in debuggers.
-// Created by Christopher Steffen for Critical Start
+// Created by Kristen Steffen for Critical Start
 
 #include <windows.h>
 #include <fileapi.h>
